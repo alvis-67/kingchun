@@ -9,5 +9,33 @@
       "order": 1
     }
   ],
-  "items": []
+  "items": [
+    {
+      "id": "media_ltemiv0",
+      "categoryId": "waterproofing",
+      "type": "image",
+      "title": "防水工程案例",
+      "caption": "",
+      "src": "/assets/cases/waterproofing/WhatsApp-Image-2026-09-26-at-10.29.50.jpeg",
+      "order": 1
+    },
+    {
+      "id": "media_421tw6d",
+      "categoryId": "waterproofing",
+      "type": "image",
+      "title": "WhatsApp Image 2026-09-26 at 10.29.51",
+      "caption": "",
+      "src": "/assets/cases/waterproofing/WhatsApp-Image-2026-09-26-at-10.29.51.jpeg",
+      "order": 2
+    },
+    {
+      "id": "media_vfbud5r",
+      "categoryId": "waterproofing",
+      "type": "image",
+      "title": "WhatsApp Image 2026-09-26 at 10.29.512",
+      "caption": "",
+      "src": "/assets/cases/waterproofing/WhatsApp-Image-2026-09-26-at-10.29.512.jpeg",
+      "order": 3
+    }
+  ]
 }
