@@ -28,6 +28,7 @@
     .ok{background:#eaf7f0;border:1px solid #b7e0c7;color:#1f7a4d}.err{background:#fdeceb;border:1px solid #f3c1bd;color:#b42318}
     table{width:100%;border-collapse:collapse;font-size:14px} th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top} th{font-size:12px;color:var(--muted);letter-spacing:.04em}
     .row-actions{display:flex;gap:6px;flex-wrap:wrap}.preview{width:72px;height:54px;object-fit:cover;background:#ddd;display:block}
+    .order-cell{min-width:88px}.order-num{display:inline-block;min-width:28px;font-weight:700;color:var(--navy)}.order-btns{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.order-btns .btn{padding:6px 8px;font-size:12px;line-height:1}
     .path-box{font-family:Consolas,monospace;background:#f3f5f7;padding:10px 12px;font-size:12px;word-break:break-all;margin:0 0 14px}
     .hidden{display:none!important}
     @media(max-width:800px){.grid-2{grid-template-columns:1fr}.top{display:block}.top .actions{margin-top:12px}}
@@ -118,8 +119,8 @@
           <input id="mediaFile" type="file" accept="image/*,video/*" multiple />
           <div class="path-box" id="mediaPathHint">/assets/cases/waterproofing/</div>
           <div id="mediaProcessHint" class="hint hidden" style="margin-top:0"></div>
-          <label>排序（單筆新增用；批次會自動接續）</label>
-          <input id="mediaOrder" type="number" value="1" />
+          <label>排序數字（也可在右側列表用 ↑↓ 調整）</label>
+          <input id="mediaOrder" type="number" value="1" min="1" />
           <div class="row-actions">
             <button class="btn" id="saveMediaBtn" type="button">儲存媒體（單筆）</button>
             <button class="btn ghost" id="resetMediaBtn" type="button">清空表單</button>
@@ -127,11 +128,12 @@
           </div>
         </div>
         <div>
-          <h3 style="margin-top:0">媒體列表</h3>
+          <h3 style="margin-top:0">媒體列表／排位順序</h3>
+          <div class="hint" style="margin-bottom:12px">用「上移／下移／置頂／置底」調整前台顯示次序。建議先篩選子目錄再排序；完成後記得下載 cases.json 發佈。</div>
           <label>篩選子目錄</label>
           <select id="mediaFilter"><option value="">全部</option></select>
           <table>
-            <thead><tr><th>預覽</th><th>資料</th><th></th></tr></thead>
+            <thead><tr><th>順序</th><th>預覽</th><th>資料</th><th></th></tr></thead>
             <tbody id="mediaTable"></tbody>
           </table>
         </div>
@@ -245,23 +247,75 @@
       $("mediaFilter").innerHTML = `<option value="">全部</option>` + cats.map((c) => `<option value="${c.id}">${c.name}</option>`).join("");
     }
 
+    function sortedByCategory(categoryId) {
+      return data.items
+        .filter((i) => i.categoryId === categoryId)
+        .slice()
+        .sort((a, b) => (a.order || 0) - (b.order || 0) || String(a.id).localeCompare(String(b.id)));
+    }
+
+    function renumberCategory(categoryId) {
+      sortedByCategory(categoryId).forEach((item, index) => {
+        item.order = index + 1;
+      });
+    }
+
+    function moveMedia(id, action) {
+      const item = data.items.find((i) => i.id === id);
+      if (!item) return;
+      const list = sortedByCategory(item.categoryId);
+      const index = list.findIndex((i) => i.id === id);
+      if (index < 0) return;
+
+      let target = index;
+      if (action === "up") target = index - 1;
+      if (action === "down") target = index + 1;
+      if (action === "top") target = 0;
+      if (action === "bottom") target = list.length - 1;
+      if (target < 0 || target >= list.length || target === index) return;
+
+      const [moved] = list.splice(index, 1);
+      list.splice(target, 0, moved);
+      list.forEach((row, i) => {
+        row.order = i + 1;
+      });
+      persist();
+      renderMedia();
+      showStatus(`已更新排位：現為第 ${target + 1} 位。記得下載 cases.json 發佈。`, "ok");
+    }
+
     function renderMedia() {
       const filter = $("mediaFilter").value;
       const rows = data.items
         .filter((i) => !filter || i.categoryId === filter)
         .slice()
-        .sort((a, b) => (a.order || 0) - (b.order || 0));
+        .sort((a, b) => {
+          if (a.categoryId !== b.categoryId) {
+            return String(a.categoryId).localeCompare(String(b.categoryId));
+          }
+          return (a.order || 0) - (b.order || 0) || String(a.id).localeCompare(String(b.id));
+        });
       const catName = (id) => data.categories.find((c) => c.id === id)?.name || "-";
 
       $("mediaTable").innerHTML = rows.map((item) => {
         const preview = item.type === "image"
           ? `<img class="preview" src="${item.src}" alt="" onerror="this.style.opacity=.3" />`
           : `<div class="preview" style="display:grid;place-items:center;font-size:11px;color:#fff;background:#092742">VIDEO</div>`;
+        const pos = sortedByCategory(item.categoryId).findIndex((i) => i.id === item.id) + 1;
         return `<tr>
+          <td class="order-cell">
+            <span class="order-num">#${pos}</span>
+            <div class="order-btns">
+              <button class="btn ghost" data-move-media="${item.id}" data-move="up" type="button" title="上移">↑</button>
+              <button class="btn ghost" data-move-media="${item.id}" data-move="down" type="button" title="下移">↓</button>
+              <button class="btn ghost" data-move-media="${item.id}" data-move="top" type="button" title="置頂">頂</button>
+              <button class="btn ghost" data-move-media="${item.id}" data-move="bottom" type="button" title="置底">底</button>
+            </div>
+          </td>
           <td>${preview}</td>
           <td>
-            <b>${item.title}</b><br>
-            <span style="color:#778;font-size:12px">${catName(item.categoryId)} ｜ ${item.type === "video" ? "視頻" : "相片"}</span><br>
+            <b>${item.title || "（無標題）"}</b><br>
+            <span style="color:#778;font-size:12px">${catName(item.categoryId)} ｜ ${item.type === "video" ? "視頻" : "相片"} ｜ 順序 ${item.order || pos}</span><br>
             <code style="font-size:11px">${item.src}</code>
           </td>
           <td class="row-actions">
@@ -269,7 +323,7 @@
             <button class="btn danger" data-del-media="${item.id}" type="button">刪除</button>
           </td>
         </tr>`;
-      }).join("") || `<tr><td colspan="3">尚未有媒體</td></tr>`;
+      }).join("") || `<tr><td colspan="4">尚未有媒體</td></tr>`;
     }
 
     function updatePathHints() {
@@ -622,8 +676,18 @@
     $("resetMediaBtn").onclick = resetMediaForm;
 
     $("mediaTable").onclick = (e) => {
-      const editId = e.target.getAttribute("data-edit-media");
-      const delId = e.target.getAttribute("data-del-media");
+      const btn = e.target.closest("button");
+      if (!btn) return;
+
+      const moveId = btn.getAttribute("data-move-media");
+      const moveAction = btn.getAttribute("data-move");
+      if (moveId && moveAction) {
+        moveMedia(moveId, moveAction);
+        return;
+      }
+
+      const editId = btn.getAttribute("data-edit-media");
+      const delId = btn.getAttribute("data-del-media");
       if (editId) {
         const item = data.items.find((i) => i.id === editId);
         $("mediaEditId").value = item.id;
@@ -637,7 +701,9 @@
       }
       if (delId) {
         if (!confirm("刪除此媒體項目？")) return;
+        const removed = data.items.find((i) => i.id === delId);
         data.items = data.items.filter((i) => i.id !== delId);
+        if (removed) renumberCategory(removed.categoryId);
         persist();
         renderAll();
         showStatus("媒體已刪除。", "ok");
