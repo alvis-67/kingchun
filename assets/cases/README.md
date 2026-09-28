@@ -4,14 +4,12 @@
 
 - `assets/cases/waterproofing/` → 防水工程
 
-建議命名：
+建議命名（後台選檔會自動產生）：
 
-- `photo-01.jpg`
-- `video-01.mp4`
+- `waterproofing-20260928-a1b2.webp`
+- `waterproofing-20260928-c9xk.mp4`
 
-然後在後台 `/admin/` 登記路徑，例如：
-
-`/assets/cases/waterproofing/photo-01.jpg`
+相片會在後台自動轉成 WebP 並改名下載；請把下載檔放入此資料夾。
 
 發佈時記得同時：
 
