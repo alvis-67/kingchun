@@ -108,8 +108,8 @@
           <select id="mediaCategory"></select>
           <label>類型 *</label>
           <select id="mediaType"><option value="image">相片</option><option value="video">視頻</option></select>
-          <label>標題 *</label>
-          <input id="mediaTitle" placeholder="例如：天台防水完成" />
+          <label>標題</label>
+          <input id="mediaTitle" placeholder="例如：天台防水完成（可留空）" />
           <label>說明（可選）</label>
           <textarea id="mediaCaption" placeholder="簡短說明"></textarea>
           <label>檔案路徑或網址 *</label>
@@ -416,7 +416,7 @@
       const caption = $("mediaCaption").value.trim();
       const src = $("mediaSrc").value.trim();
       const order = Number($("mediaOrder").value || 1);
-      if (!categoryId || !title || !src) return alert("請填寫子目錄、標題及路徑／網址");
+      if (!categoryId || !src) return alert("請填寫子目錄及路徑／網址");
 
       const editId = $("mediaEditId").value;
       if (editId) {
