@@ -99,6 +99,15 @@
       "caption": "",
       "src": "/assets/cases/waterproofing/waterproofing-20260928-9gbf.webp",
       "order": 10
+    },
+    {
+      "id": "media_2oj7itj",
+      "categoryId": "waterproofing",
+      "type": "video",
+      "title": "",
+      "caption": "",
+      "src": "/assets/cases/waterproofing/waterproofing-20260928-vxpe.mp4",
+      "order": 11
     }
   ]
 }
