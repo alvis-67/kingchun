@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>後台｜工程案例管理</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--navy:#092742;--orange:#ef8b27;--cream:#f4f6f8;--ink:#142534;--muted:#61717e;--line:#d7dee3;--ok:#1f7a4d;--danger:#b42318}
+    *{box-sizing:border-box} body{margin:0;font-family:"Noto Sans HK",Arial,sans-serif;background:var(--cream);color:var(--ink)}
+    a{color:var(--orange)} button,input,select,textarea{font:inherit}
+    .wrap{width:min(1100px,calc(100% - 32px));margin:0 auto;padding:28px 0 60px}
+    .login-box{max-width:420px;margin:80px auto;background:#fff;padding:34px;border:1px solid var(--line)}
+    .login-box h1{margin:0 0 8px;font-size:24px}.login-box p{color:var(--muted);margin:0 0 22px;font-size:14px;line-height:1.7}
+    label{display:block;font-size:13px;font-weight:600;margin:0 0 6px}
+    input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);background:#fff;margin-bottom:14px}
+    textarea{min-height:80px;resize:vertical}
+    .btn{border:0;background:var(--orange);color:#fff;padding:11px 18px;font-weight:700;cursor:pointer}
+    .btn.secondary{background:var(--navy)}.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}.btn.danger{background:var(--danger)}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:22px}
+    .top h1{margin:0;font-size:26px}.top .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .tabs{display:flex;gap:8px;margin-bottom:18px}.tab{padding:10px 16px;background:#fff;border:1px solid var(--line);cursor:pointer;font-weight:600}.tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+    .panel{display:none;background:#fff;border:1px solid var(--line);padding:22px}.panel.active{display:block}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .hint{background:#f8f1e7;border:1px solid #efd8b5;padding:12px 14px;font-size:13px;line-height:1.7;margin-bottom:16px;color:#5b4630}
+    .ok{background:#eaf7f0;border:1px solid #b7e0c7;color:#1f7a4d}.err{background:#fdeceb;border:1px solid #f3c1bd;color:#b42318}
+    table{width:100%;border-collapse:collapse;font-size:14px} th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top} th{font-size:12px;color:var(--muted);letter-spacing:.04em}
+    .row-actions{display:flex;gap:6px;flex-wrap:wrap}.preview{width:72px;height:54px;object-fit:cover;background:#ddd;display:block}
+    .path-box{font-family:Consolas,monospace;background:#f3f5f7;padding:10px 12px;font-size:12px;word-break:break-all;margin:0 0 14px}
+    .hidden{display:none!important}
+    @media(max-width:800px){.grid-2{grid-template-columns:1fr}.top{display:block}.top .actions{margin-top:12px}}
+  </style>
+</head>
+<body>
+  <div id="loginView" class="login-box">
+    <h1>工程案例後台</h1>
+    <p>管理「工程案例」子目錄，以及各分類的相片／視頻。</p>
+    <label for="password">密碼</label>
+    <input id="password" type="password" placeholder="輸入後台密碼" />
+    <button class="btn" id="loginBtn" type="button">登入</button>
+    <p style="margin-top:16px;font-size:12px;color:#88949e">預設密碼：<code>kingchun2026</code>（可在本頁登入後修改）</p>
+  </div>
+
+  <div id="appView" class="wrap hidden">
+    <div class="top">
+      <div>
+        <h1>工程案例後台</h1>
+        <div style="color:var(--muted);font-size:13px;margin-top:6px">前台：<a href="../cases/" target="_blank">/cases/</a>　｜　資料檔：<code>/data/cases.json</code></div>
+      </div>
+      <div class="actions">
+        <button class="btn secondary" id="exportBtn" type="button">下載 cases.json（發佈用）</button>
+        <button class="btn ghost" id="logoutBtn" type="button">登出</button>
+      </div>
+    </div>
+
+    <div id="status" class="hint hidden"></div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="categories" type="button">1. 子目錄設定</button>
+      <button class="tab" data-tab="media" type="button">2. 相片／視頻</button>
+      <button class="tab" data-tab="publish" type="button">3. 發佈說明</button>
+      <button class="tab" data-tab="settings" type="button">設定</button>
+    </div>
+
+    <section class="panel active" id="panel-categories">
+      <div class="hint">在這裡新增／修改「工程案例」下的子目錄（例如：防水工程、水務工程）。前台導覽會自動讀取。</div>
+      <div class="grid-2">
+        <div>
+          <h3 style="margin-top:0">新增／編輯子目錄</h3>
+          <input type="hidden" id="catEditId" />
+          <label>顯示名稱 *</label>
+          <input id="catName" placeholder="例如：防水工程" />
+          <label>網址代碼（英文／數字）*</label>
+          <input id="catSlug" placeholder="例如：waterproofing" />
+          <label>簡介</label>
+          <textarea id="catDesc" placeholder="此分類的簡短說明"></textarea>
+          <label>封面圖路徑（可選）</label>
+          <input id="catCover" placeholder="/assets/cases/waterproofing/cover.jpg" />
+          <label>排序（數字愈小愈前）</label>
+          <input id="catOrder" type="number" value="1" />
+          <div class="row-actions">
+            <button class="btn" id="saveCatBtn" type="button">儲存子目錄</button>
+            <button class="btn ghost" id="resetCatBtn" type="button">清空表單</button>
+          </div>
+          <div class="hint" style="margin-top:16px">檔案放置位置建議：<div class="path-box" id="catPathHint">/assets/cases/你的代碼/</div></div>
+        </div>
+        <div>
+          <h3 style="margin-top:0">現有子目錄</h3>
+          <table>
+            <thead><tr><th>名稱</th><th>代碼</th><th>項目數</th><th></th></tr></thead>
+            <tbody id="catTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-media">
+      <div class="hint">
+        先把相片／視頻檔案放到對應資料夾（見下方路徑），再在此登記標題與路徑；或直接貼上 YouTube／圖片網址。
+      </div>
+      <div class="grid-2">
+        <div>
+          <h3 style="margin-top:0">新增／編輯媒體</h3>
+          <input type="hidden" id="mediaEditId" />
+          <label>所屬子目錄 *</label>
+          <select id="mediaCategory"></select>
+          <label>類型 *</label>
+          <select id="mediaType"><option value="image">相片</option><option value="video">視頻</option></select>
+          <label>標題 *</label>
+          <input id="mediaTitle" placeholder="例如：天台防水完成" />
+          <label>說明（可選）</label>
+          <textarea id="mediaCaption" placeholder="簡短說明"></textarea>
+          <label>檔案路徑或網址 *</label>
+          <input id="mediaSrc" placeholder="/assets/cases/waterproofing/photo-01.jpg 或 YouTube 連結" />
+          <label>本機選擇檔案（只產生建議檔名與路徑，不會自動上傳）</label>
+          <input id="mediaFile" type="file" accept="image/*,video/*" />
+          <div class="path-box" id="mediaPathHint">/assets/cases/waterproofing/</div>
+          <label>排序</label>
+          <input id="mediaOrder" type="number" value="1" />
+          <div class="row-actions">
+            <button class="btn" id="saveMediaBtn" type="button">儲存媒體</button>
+            <button class="btn ghost" id="resetMediaBtn" type="button">清空表單</button>
+          </div>
+        </div>
+        <div>
+          <h3 style="margin-top:0">媒體列表</h3>
+          <label>篩選子目錄</label>
+          <select id="mediaFilter"><option value="">全部</option></select>
+          <table>
+            <thead><tr><th>預覽</th><th>資料</th><th></th></tr></thead>
+            <tbody id="mediaTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-publish">
+      <h3 style="margin-top:0">如何讓前台顯示你新增的內容</h3>
+      <ol style="line-height:1.9;color:#334455;padding-left:20px">
+        <li>在「子目錄設定」建立分類（已有「防水工程」）。</li>
+        <li>把相片／視頻放到 GitHub 專案資料夾：<div class="path-box">assets/cases/waterproofing/</div></li>
+        <li>在「相片／視頻」填寫標題，路徑例如：<div class="path-box">/assets/cases/waterproofing/photo-01.jpg</div></li>
+        <li>按上方「下載 cases.json（發佈用）」。</li>
+        <li>用下載的檔案覆蓋專案裡的 <code>data/cases.json</code>，連同媒體檔一併上傳／push 到 GitHub，Vercel 會自動更新網站。</li>
+      </ol>
+      <div class="hint ok">後台網址：<code>/admin/</code>（例如 https://kingchun.hk/admin/）</div>
+      <div class="hint">相片資料夾：<code>/assets/cases/防水工程代碼/</code>　｜　前台瀏覽：<code>/cases/</code>　｜　防水工程：<code>/cases/category.html?slug=waterproofing</code></div>
+      <button class="btn secondary" id="importBtn" type="button">匯入現有 cases.json</button>
+      <input id="importFile" type="file" accept="application/json,.json" class="hidden" />
+    </section>
+
+    <section class="panel" id="panel-settings">
+      <h3 style="margin-top:0">更改後台密碼</h3>
+      <label>新密碼</label>
+      <input id="newPassword" type="password" />
+      <label>確認新密碼</label>
+      <input id="newPassword2" type="password" />
+      <button class="btn" id="savePasswordBtn" type="button">儲存密碼（本機瀏覽器）</button>
+      <div class="hint" style="margin-top:16px">密碼只保存在此瀏覽器。換電腦後請用預設密碼登入再重新設定。</div>
+    </section>
+  </div>
+
+  <script>
+    const DEFAULT_PASSWORD = "kingchun2026";
+    const STORAGE_KEY = "kingchun_cases_data_v1";
+    const AUTH_KEY = "kingchun_admin_auth";
+    const PASS_KEY = "kingchun_admin_pass";
+
+    let data = { categories: [], items: [] };
+
+    const $ = (id) => document.getElementById(id);
+    function showStatus(msg, type = "") {
+      const el = $("status");
+      el.className = "hint " + type;
+      el.textContent = msg;
+      el.classList.remove("hidden");
+    }
+
+    function getPassword() {
+      return localStorage.getItem(PASS_KEY) || DEFAULT_PASSWORD;
+    }
+
+    function uid(prefix) {
+      return prefix + "_" + Math.random().toString(36).slice(2, 9);
+    }
+
+    function slugify(text) {
+      return String(text || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9\-]/g, "")
+        .replace(/\-+/g, "-")
+        .replace(/^\-|\-$/g, "");
+    }
+
+    async function loadInitial() {
+      const cached = localStorage.getItem(STORAGE_KEY);
+      if (cached) {
+        data = JSON.parse(cached);
+        return;
+      }
+      const res = await fetch("../data/cases.json", { cache: "no-store" });
+      data = await res.json();
+      persist();
+    }
+
+    function persist() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function enterApp() {
+      $("loginView").classList.add("hidden");
+      $("appView").classList.remove("hidden");
+      renderAll();
+    }
+
+    function renderAll() {
+      renderCategories();
+      renderMedia();
+      updatePathHints();
+    }
+
+    function renderCategories() {
+      const tbody = $("catTable");
+      const cats = data.categories.slice().sort((a, b) => (a.order || 0) - (b.order || 0));
+      tbody.innerHTML = cats.map((c) => {
+        const count = data.items.filter((i) => i.categoryId === c.id).length;
+        return `<tr>
+          <td><b>${c.name}</b><div style="color:#778;font-size:12px">${c.description || ""}</div></td>
+          <td><code>${c.slug}</code></td>
+          <td>${count}</td>
+          <td class="row-actions">
+            <button class="btn ghost" data-edit-cat="${c.id}" type="button">編輯</button>
+            <button class="btn danger" data-del-cat="${c.id}" type="button">刪除</button>
+          </td>
+        </tr>`;
+      }).join("") || `<tr><td colspan="4">尚未有子目錄</td></tr>`;
+
+      $("mediaCategory").innerHTML = cats.map((c) => `<option value="${c.id}">${c.name}</option>`).join("");
+      $("mediaFilter").innerHTML = `<option value="">全部</option>` + cats.map((c) => `<option value="${c.id}">${c.name}</option>`).join("");
+    }
+
+    function renderMedia() {
+      const filter = $("mediaFilter").value;
+      const rows = data.items
+        .filter((i) => !filter || i.categoryId === filter)
+        .slice()
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
+      const catName = (id) => data.categories.find((c) => c.id === id)?.name || "-";
+
+      $("mediaTable").innerHTML = rows.map((item) => {
+        const preview = item.type === "image"
+          ? `<img class="preview" src="${item.src}" alt="" onerror="this.style.opacity=.3" />`
+          : `<div class="preview" style="display:grid;place-items:center;font-size:11px;color:#fff;background:#092742">VIDEO</div>`;
+        return `<tr>
+          <td>${preview}</td>
+          <td>
+            <b>${item.title}</b><br>
+            <span style="color:#778;font-size:12px">${catName(item.categoryId)} ｜ ${item.type === "video" ? "視頻" : "相片"}</span><br>
+            <code style="font-size:11px">${item.src}</code>
+          </td>
+          <td class="row-actions">
+            <button class="btn ghost" data-edit-media="${item.id}" type="button">編輯</button>
+            <button class="btn danger" data-del-media="${item.id}" type="button">刪除</button>
+          </td>
+        </tr>`;
+      }).join("") || `<tr><td colspan="3">尚未有媒體</td></tr>`;
+    }
+
+    function updatePathHints() {
+      const slug = $("catSlug").value.trim() || "your-slug";
+      $("catPathHint").textContent = `/assets/cases/${slug}/`;
+      const catId = $("mediaCategory").value;
+      const cat = data.categories.find((c) => c.id === catId);
+      $("mediaPathHint").textContent = cat
+        ? `/assets/cases/${cat.slug}/　→　請把檔案放到此資料夾，然後在上方填入完整路徑`
+        : "請先建立子目錄";
+    }
+
+    function resetCatForm() {
+      $("catEditId").value = "";
+      $("catName").value = "";
+      $("catSlug").value = "";
+      $("catDesc").value = "";
+      $("catCover").value = "";
+      $("catOrder").value = String((data.categories.length || 0) + 1);
+      updatePathHints();
+    }
+
+    function resetMediaForm() {
+      $("mediaEditId").value = "";
+      $("mediaTitle").value = "";
+      $("mediaCaption").value = "";
+      $("mediaSrc").value = "";
+      $("mediaType").value = "image";
+      $("mediaOrder").value = String((data.items.length || 0) + 1);
+      $("mediaFile").value = "";
+      updatePathHints();
+    }
+
+    $("loginBtn").onclick = () => {
+      if ($("password").value === getPassword()) {
+        sessionStorage.setItem(AUTH_KEY, "1");
+        enterApp();
+      } else {
+        alert("密碼錯誤");
+      }
+    };
+
+    $("logoutBtn").onclick = () => {
+      sessionStorage.removeItem(AUTH_KEY);
+      location.reload();
+    };
+
+    document.querySelectorAll(".tab").forEach((tab) => {
+      tab.onclick = () => {
+        document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+        document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
+        tab.classList.add("active");
+        $("panel-" + tab.dataset.tab).classList.add("active");
+      };
+    });
+
+    $("catName").oninput = () => {
+      if (!$("catEditId").value && !$("catSlug").dataset.locked) {
+        $("catSlug").value = slugify($("catName").value) || $("catSlug").value;
+      }
+      updatePathHints();
+    };
+    $("catSlug").oninput = updatePathHints;
+    $("mediaCategory").onchange = updatePathHints;
+    $("mediaFilter").onchange = renderMedia;
+
+    $("mediaFile").onchange = () => {
+      const file = $("mediaFile").files?.[0];
+      if (!file) return;
+      const cat = data.categories.find((c) => c.id === $("mediaCategory").value);
+      if (!cat) {
+        alert("請先選擇子目錄");
+        return;
+      }
+      const safe = file.name.replace(/\s+/g, "-");
+      $("mediaSrc").value = `/assets/cases/${cat.slug}/${safe}`;
+      $("mediaType").value = file.type.startsWith("video/") ? "video" : "image";
+      if (!$("mediaTitle").value) $("mediaTitle").value = file.name.replace(/\.[^.]+$/, "");
+      showStatus(`已產生路徑。請把檔案「${file.name}」放到 assets/cases/${cat.slug}/ 後再發佈。`, "ok");
+      updatePathHints();
+    };
+
+    $("saveCatBtn").onclick = () => {
+      const name = $("catName").value.trim();
+      let slug = $("catSlug").value.trim() || slugify(name);
+      const desc = $("catDesc").value.trim();
+      const cover = $("catCover").value.trim();
+      const order = Number($("catOrder").value || 1);
+      if (!name || !slug) return alert("請填寫名稱及網址代碼");
+      if (!/^[a-z0-9\-]+$/.test(slug)) return alert("網址代碼只可用英文小寫、數字、連字號");
+
+      const editId = $("catEditId").value;
+      if (data.categories.some((c) => c.slug === slug && c.id !== editId)) {
+        return alert("此網址代碼已被使用");
+      }
+
+      if (editId) {
+        const cat = data.categories.find((c) => c.id === editId);
+        Object.assign(cat, { name, slug, description: desc, cover, order });
+      } else {
+        data.categories.push({
+          id: uid("cat"),
+          name,
+          slug,
+          description: desc,
+          cover,
+          order
+        });
+      }
+      persist();
+      resetCatForm();
+      renderAll();
+      showStatus("子目錄已儲存（暫存在此瀏覽器）。記得下載 cases.json 發佈。", "ok");
+    };
+
+    $("resetCatBtn").onclick = resetCatForm;
+
+    $("catTable").onclick = (e) => {
+      const editId = e.target.getAttribute("data-edit-cat");
+      const delId = e.target.getAttribute("data-del-cat");
+      if (editId) {
+        const cat = data.categories.find((c) => c.id === editId);
+        $("catEditId").value = cat.id;
+        $("catName").value = cat.name;
+        $("catSlug").value = cat.slug;
+        $("catSlug").dataset.locked = "1";
+        $("catDesc").value = cat.description || "";
+        $("catCover").value = cat.cover || "";
+        $("catOrder").value = cat.order || 1;
+        updatePathHints();
+      }
+      if (delId) {
+        if (!confirm("刪除此子目錄？其下媒體項目也會一併刪除。")) return;
+        data.categories = data.categories.filter((c) => c.id !== delId);
+        data.items = data.items.filter((i) => i.categoryId !== delId);
+        persist();
+        renderAll();
+        showStatus("子目錄已刪除。", "ok");
+      }
+    };
+
+    $("saveMediaBtn").onclick = () => {
+      const categoryId = $("mediaCategory").value;
+      const type = $("mediaType").value;
+      const title = $("mediaTitle").value.trim();
+      const caption = $("mediaCaption").value.trim();
+      const src = $("mediaSrc").value.trim();
+      const order = Number($("mediaOrder").value || 1);
+      if (!categoryId || !title || !src) return alert("請填寫子目錄、標題及路徑／網址");
+
+      const editId = $("mediaEditId").value;
+      if (editId) {
+        const item = data.items.find((i) => i.id === editId);
+        Object.assign(item, { categoryId, type, title, caption, src, order });
+      } else {
+        data.items.push({
+          id: uid("media"),
+          categoryId,
+          type,
+          title,
+          caption,
+          src,
+          order
+        });
+      }
+      persist();
+      resetMediaForm();
+      renderAll();
+      showStatus("媒體已儲存（暫存在此瀏覽器）。記得下載 cases.json 並上傳檔案到 assets。", "ok");
+    };
+
+    $("resetMediaBtn").onclick = resetMediaForm;
+
+    $("mediaTable").onclick = (e) => {
+      const editId = e.target.getAttribute("data-edit-media");
+      const delId = e.target.getAttribute("data-del-media");
+      if (editId) {
+        const item = data.items.find((i) => i.id === editId);
+        $("mediaEditId").value = item.id;
+        $("mediaCategory").value = item.categoryId;
+        $("mediaType").value = item.type;
+        $("mediaTitle").value = item.title || "";
+        $("mediaCaption").value = item.caption || "";
+        $("mediaSrc").value = item.src || "";
+        $("mediaOrder").value = item.order || 1;
+        updatePathHints();
+      }
+      if (delId) {
+        if (!confirm("刪除此媒體項目？")) return;
+        data.items = data.items.filter((i) => i.id !== delId);
+        persist();
+        renderAll();
+        showStatus("媒體已刪除。", "ok");
+      }
+    };
+
+    $("exportBtn").onclick = () => {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "cases.json";
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showStatus("已下載 cases.json。請覆蓋 data/cases.json 並 push 到 GitHub。", "ok");
+    };
+
+    $("importBtn").onclick = () => $("importFile").click();
+    $("importFile").onchange = async () => {
+      const file = $("importFile").files?.[0];
+      if (!file) return;
+      try {
+        data = JSON.parse(await file.text());
+        if (!Array.isArray(data.categories) || !Array.isArray(data.items)) throw new Error("格式不正確");
+        persist();
+        renderAll();
+        showStatus("已匯入 cases.json。", "ok");
+      } catch (err) {
+        showStatus("匯入失敗：" + err.message, "err");
+      }
+    };
+
+    $("savePasswordBtn").onclick = () => {
+      const p1 = $("newPassword").value;
+      const p2 = $("newPassword2").value;
+      if (!p1 || p1.length < 6) return alert("密碼至少 6 位");
+      if (p1 !== p2) return alert("兩次密碼不一致");
+      localStorage.setItem(PASS_KEY, p1);
+      $("newPassword").value = "";
+      $("newPassword2").value = "";
+      showStatus("密碼已更新。", "ok");
+    };
+
+    (async () => {
+      await loadInitial();
+      if (sessionStorage.getItem(AUTH_KEY) === "1") enterApp();
+    })();
+  </script>
+</body>
+</html>

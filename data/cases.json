@@ -1,0 +1,13 @@
+{
+  "categories": [
+    {
+      "id": "waterproofing",
+      "name": "防水工程",
+      "slug": "waterproofing",
+      "description": "天台、露台、浴室及外牆防水工程案例。",
+      "cover": "",
+      "order": 1
+    }
+  ],
+  "items": []
+}
