@@ -11,31 +11,94 @@
   ],
   "items": [
     {
-      "id": "media_ltemiv0",
+      "id": "media_aokbgev",
       "categoryId": "waterproofing",
       "type": "image",
-      "title": "防水工程案例",
+      "title": "",
       "caption": "",
-      "src": "/assets/cases/waterproofing/WhatsApp-Image-2026-09-26-at-10.29.50.jpeg",
+      "src": "/assets/cases/waterproofing/waterproofing-20260928-nzml.webp",
       "order": 1
     },
     {
-      "id": "media_421tw6d",
+      "id": "media_ico6s40",
       "categoryId": "waterproofing",
       "type": "image",
-      "title": "WhatsApp Image 2026-09-26 at 10.29.51",
+      "title": "",
       "caption": "",
-      "src": "/assets/cases/waterproofing/WhatsApp-Image-2026-09-26-at-10.29.51.jpeg",
+      "src": "/assets/cases/waterproofing/waterproofing-20260928-6dst.webp",
       "order": 2
     },
     {
-      "id": "media_vfbud5r",
+      "id": "media_v2xggwe",
       "categoryId": "waterproofing",
       "type": "image",
-      "title": "WhatsApp Image 2026-09-26 at 10.29.512",
+      "title": "",
       "caption": "",
-      "src": "/assets/cases/waterproofing/WhatsApp-Image-2026-09-26-at-10.29.512.jpeg",
+      "src": "/assets/cases/waterproofing/waterproofing-20260928-7hru.webp",
       "order": 3
+    },
+    {
+      "id": "media_g3a5ul9",
+      "categoryId": "waterproofing",
+      "type": "image",
+      "title": "",
+      "caption": "",
+      "src": "/assets/cases/waterproofing/waterproofing-20260928-tkbh.webp",
+      "order": 4
+    },
+    {
+      "id": "media_b0rq0kl",
+      "categoryId": "waterproofing",
+      "type": "image",
+      "title": "",
+      "caption": "",
+      "src": "/assets/cases/waterproofing/waterproofing-20260928-9r6x.webp",
+      "order": 5
+    },
+    {
+      "id": "media_lew2bos",
+      "categoryId": "waterproofing",
+      "type": "image",
+      "title": "",
+      "caption": "",
+      "src": "/assets/cases/waterproofing/waterproofing-20260928-mjfz.webp",
+      "order": 6
+    },
+    {
+      "id": "media_g0ztvfd",
+      "categoryId": "waterproofing",
+      "type": "image",
+      "title": "",
+      "caption": "",
+      "src": "/assets/cases/waterproofing/waterproofing-20260928-i1gf.webp",
+      "order": 7
+    },
+    {
+      "id": "media_cjgjbkg",
+      "categoryId": "waterproofing",
+      "type": "image",
+      "title": "",
+      "caption": "",
+      "src": "/assets/cases/waterproofing/waterproofing-20260928-qenb.webp",
+      "order": 8
+    },
+    {
+      "id": "media_ftkpj8d",
+      "categoryId": "waterproofing",
+      "type": "image",
+      "title": "",
+      "caption": "",
+      "src": "/assets/cases/waterproofing/waterproofing-20260928-xbqt.webp",
+      "order": 9
+    },
+    {
+      "id": "media_hgvts1x",
+      "categoryId": "waterproofing",
+      "type": "image",
+      "title": "",
+      "caption": "",
+      "src": "/assets/cases/waterproofing/waterproofing-20260928-9gbf.webp",
+      "order": 10
     }
   ]
 }
